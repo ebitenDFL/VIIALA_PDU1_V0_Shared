@@ -1,11 +1,11 @@
-# Developer preview 2026-11-12
+# Developer preview 2026-11-13
 
 ## Included firmware
 
 | Image | Size | SHA-256 |
 |---|---:|---|
-| `VIIALA_PDU1_V0_A001_DEV_KEY_BENCH_ONLY.bin` | 58,480 bytes | `8fc28a75b3508c335df48a137c5e1fb8828c47963a046b7788883af7ce6ea681` |
-| `VIIALA_PDU1_V0_B001_DEV_KEY_BENCH_ONLY.bin` | 58,480 bytes | `c6789a5451b230c0fb170b07d5d28ee2517642a030cb738b5c8d486a4c863af6` |
+| `VIIALA_PDU1_V0_A001_DEV_KEY_BENCH_ONLY.bin` | 61,140 bytes | `f1175746a0ef250087bbff5aa03c19a3eba767b2c3df229d86fa439df1d2933e` |
+| `VIIALA_PDU1_V0_B001_DEV_KEY_BENCH_ONLY.bin` | 61,140 bytes | `1fab89ced28a11d775b0b1f322f8cc4dfddd67a1f9b6a0eac95c075ea869b0ed` |
 
 ## Verified
 
@@ -16,6 +16,8 @@
 - AD7490 SPI mode 0 and channel communication.
 - Output requests, protection configuration and latched fault control objects.
 - Linux GUI connection, telemetry, raw SDO access and firmware update workflow.
+- Zephyr 4.5.0 compile, signing and A-to-B CAN update on the connected F7.
+- Automatic SocketCAN setup and per-row ON/OFF/Reset workbench controls.
 
 ## Pending validation
 

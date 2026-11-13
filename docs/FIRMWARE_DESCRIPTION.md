@@ -1,5 +1,8 @@
 # Firmware description
 
+The included A001 and B001 images are built with the pinned Zephyr 4.5.0
+release and Zephyr SDK 1.0.1.
+
 ## Target hardware
 
 `VIIALA_PDU1_V0` targets the verified HW20 board with an STM32F722RCT6

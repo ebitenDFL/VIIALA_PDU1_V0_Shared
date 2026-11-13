@@ -98,6 +98,8 @@ class PduGUI:
         style.configure("Card.TFrame", background=PANEL_2)
         style.configure("TLabel", background=BG, foreground=TEXT)
         style.configure("Panel.TLabel", background=PANEL, foreground=TEXT)
+        style.configure("Active.Panel.TLabel", background=PANEL, foreground=ACCENT)
+        style.configure("Fault.Panel.TLabel", background=PANEL, foreground=ERROR)
         style.configure("Card.TLabel", background=PANEL_2, foreground=TEXT)
         style.configure("Muted.TLabel", background=BG, foreground=MUTED)
         style.configure("PanelMuted.TLabel", background=PANEL, foreground=MUTED)
@@ -108,6 +110,13 @@ class PduGUI:
         style.map("Accent.TButton", background=[("active", "#6EE7B7"), ("disabled", "#33443D")])
         style.configure("TButton", background=PANEL_2, foreground=TEXT, padding=(10, 7))
         style.map("TButton", background=[("active", "#2C3945")])
+        style.configure("Small.TButton", background=PANEL_2, foreground=TEXT, padding=(7, 3))
+        style.configure("On.Small.TButton", background=ACCENT, foreground="#07120D", padding=(7, 3))
+        style.map("On.Small.TButton", background=[("active", "#6EE7B7"), ("disabled", "#33443D")])
+        style.configure("Off.Small.TButton", background="#334155", foreground=TEXT, padding=(7, 3))
+        style.map("Off.Small.TButton", background=[("active", "#475569")])
+        style.configure("Reset.Small.TButton", background="#78350F", foreground=TEXT, padding=(7, 3))
+        style.map("Reset.Small.TButton", background=[("active", "#92400E")])
         style.configure("TEntry", fieldbackground=PANEL_2, foreground=TEXT, insertcolor=TEXT)
         style.configure("TNotebook", background=BG, borderwidth=0)
         style.configure("TNotebook.Tab", background=PANEL, foreground=MUTED, padding=(16, 9))
@@ -224,18 +233,59 @@ class PduGUI:
         ttk.Button(controls, text="Request ON/OFF", style="Accent.TButton", command=self._toggle_output).grid(row=1, column=7, padx=4)
         ttk.Button(controls, text="Clear fault", command=self._clear_channel_fault).grid(row=1, column=8, padx=4)
 
-        columns = ("channel", "actual", "commanded", "current", "raw", "peak", "trips", "fault")
-        self.channel_tree = ttk.Treeview(self.channels_tab, columns=columns, show="headings")
-        headings = ("Output", "Actual", "Command", "Current", "ADC raw", "Peak", "Trips", "Fault")
-        widths = (80, 90, 90, 120, 100, 120, 90, 120)
-        for col, heading, width in zip(columns, headings, widths):
-            self.channel_tree.heading(col, text=heading)
-            self.channel_tree.column(col, width=width, anchor="center")
-        self.channel_tree.pack(fill="both", expand=True)
-        self.channel_tree.tag_configure("fault", foreground=ERROR)
-        self.channel_tree.tag_configure("active", foreground=ACCENT)
+        table = ttk.Frame(self.channels_tab, style="Panel.TFrame", padding=(8, 6))
+        table.pack(fill="both", expand=True)
+        headings = ("Output", "Actual", "Commanded", "Current", "ADC raw", "Peak", "Trips", "Fault", "Direct SDO control")
+        weights = (0, 0, 0, 1, 1, 1, 0, 1, 0)
+        for col, (heading, weight) in enumerate(zip(headings, weights)):
+            ttk.Label(table, text=heading, style="PanelMuted.TLabel", anchor="center").grid(
+                row=0, column=col, sticky="ew", padx=4, pady=(0, 5)
+            )
+            table.columnconfigure(col, weight=weight, minsize=70 if col < 8 else 220)
+
+        self.channel_values: list[dict[str, tk.StringVar]] = []
+        self.channel_value_labels: list[list[ttk.Label]] = []
         for channel in range(1, OUTPUT_COUNT + 1):
-            self.channel_tree.insert("", "end", iid=str(channel), values=(f"OUT {channel:02d}", "OFF", "OFF", "—", "—", "—", "0", "—"))
+            variables = {
+                "actual": tk.StringVar(value="OFF"),
+                "requested": tk.StringVar(value="OFF"),
+                "current": tk.StringVar(value="—"),
+                "raw": tk.StringVar(value="—"),
+                "peak": tk.StringVar(value="—"),
+                "trips": tk.StringVar(value="0"),
+                "fault": tk.StringVar(value="—"),
+            }
+            self.channel_values.append(variables)
+            ttk.Label(table, text=f"OUT {channel:02d}", style="Panel.TLabel", anchor="center").grid(
+                row=channel, column=0, sticky="ew", padx=4, pady=2
+            )
+            labels = []
+            for col, key in enumerate(("actual", "requested", "current", "raw", "peak", "trips", "fault"), start=1):
+                label = ttk.Label(table, textvariable=variables[key], style="Panel.TLabel", anchor="center")
+                label.grid(row=channel, column=col, sticky="ew", padx=4, pady=2)
+                labels.append(label)
+            self.channel_value_labels.append(labels)
+
+            actions = ttk.Frame(table, style="Panel.TFrame")
+            actions.grid(row=channel, column=8, sticky="e", padx=(8, 2), pady=1)
+            ttk.Button(
+                actions,
+                text="ON",
+                style="On.Small.TButton",
+                command=lambda selected=channel: self._request_output(selected, True),
+            ).pack(side="left", padx=2)
+            ttk.Button(
+                actions,
+                text="OFF",
+                style="Off.Small.TButton",
+                command=lambda selected=channel: self._request_output(selected, False),
+            ).pack(side="left", padx=2)
+            ttk.Button(
+                actions,
+                text="Reset",
+                style="Reset.Small.TButton",
+                command=lambda selected=channel: self._reset_output(selected),
+            ).pack(side="left", padx=2)
 
     def _build_tools(self) -> None:
         left = ttk.Frame(self.tools_tab, style="Panel.TFrame", padding=18)
@@ -368,13 +418,28 @@ class PduGUI:
         channel = self.selected_channel.get()
         bit = 1 << (channel - 1)
         turning_on = not bool(self.last_snapshot.output_request & bit)
+        self._request_output(channel, turning_on)
+
+    def _request_output(self, channel: int, turning_on: bool) -> None:
+        if not self.connected or self.last_snapshot is None:
+            messagebox.showerror("Not connected", "Connect to the PDU before controlling an output.")
+            return
         if turning_on and self.last_snapshot.nmt_state != "Operational":
             messagebox.showerror("Node not Operational", "Start the CANopen node before requesting an output ON.")
             return
-        action = "ON" if turning_on else "OFF"
-        if messagebox.askyesno(f"Request output {action}", f"Request output {channel} {action}?\n\nVerify the connected load and current limits first."):
-            bitmap = (self.last_snapshot.output_request | bit) if turning_on else (self.last_snapshot.output_request & ~bit)
-            self._send_command("sdo_write", 0x2103, 0, int(bitmap).to_bytes(2, "little"))
+        self.selected_channel.set(channel)
+        if turning_on:
+            prompt = f"Request output {channel} ON?\n\nVerify the connected load and current limits first."
+            if not messagebox.askyesno("Request output ON", prompt):
+                return
+        self._send_command("output_request", channel, turning_on)
+
+    def _reset_output(self, channel: int) -> None:
+        if not self.connected:
+            messagebox.showerror("Not connected", "Connect to the PDU before resetting an output.")
+            return
+        self.selected_channel.set(channel)
+        self._send_command("output_reset", channel)
 
     def _clear_channel_fault(self) -> None:
         channel = self.selected_channel.get()
@@ -463,6 +528,24 @@ class PduGUI:
                         index, subindex, data = args
                         self.client.download(int(index), int(subindex), bytes(data))
                         self.events.put(("message", f"SDO write complete: 0x{int(index):04X}:{int(subindex):02X}"))
+                        next_poll = 0.0
+                    elif name == "output_request" and self.client:
+                        channel, turning_on = int(args[0]), bool(args[1])
+                        bit = 1 << (channel - 1)
+                        bitmap = decode_u(self.client.upload(0x2103, 0))
+                        bitmap = (bitmap | bit) if turning_on else (bitmap & ~bit)
+                        self.client.download(0x2103, 0, bitmap.to_bytes(2, "little"))
+                        action = "ON" if turning_on else "OFF"
+                        self.events.put(("message", f"Output {channel} requested {action} by SDO"))
+                        next_poll = 0.0
+                    elif name == "output_reset" and self.client:
+                        channel = int(args[0])
+                        bit = 1 << (channel - 1)
+                        bitmap = decode_u(self.client.upload(0x2103, 0)) & ~bit
+                        self.client.download(0x2103, 0, bitmap.to_bytes(2, "little"))
+                        self.client.download(0x2104, 0, bit.to_bytes(2, "little"))
+                        self.client.download(0x2104, 0, b"\x00\x00")
+                        self.events.put(("message", f"Output {channel} forced OFF and fault reset by SDO"))
                         next_poll = 0.0
                     elif name == "channel_settings" and self.client:
                         channel, limit_ma, trip_ms, inrush_ma, inrush_ms = map(int, args)
@@ -605,12 +688,21 @@ class PduGUI:
             current = fmt_unknown(snap.currents_ma[index], 0xFFFF, " mA")
             raw = fmt_unknown(snap.raw_adc[index], 0xFFFF)
             peak = fmt_unknown(snap.peak_currents_ma[index], 0xFFFF, " mA")
-            tags = ("fault",) if fault else (("active",) if actual else ())
-            self.channel_tree.item(
-                str(index + 1),
-                values=(f"OUT {index + 1:02d}", "ON" if actual else "OFF", "ON" if commanded else "OFF", current, raw, peak, str(snap.trip_counts[index]), "FAULT" if fault else "—"),
-                tags=tags,
-            )
+            values = self.channel_values[index]
+            values["actual"].set("ON" if actual else "OFF")
+            values["requested"].set("ON" if commanded else "OFF")
+            values["current"].set(current)
+            values["raw"].set(raw)
+            values["peak"].set(peak)
+            values["trips"].set(str(snap.trip_counts[index]))
+            values["fault"].set("FAULT" if fault else "—")
+            label_style = "Panel.TLabel"
+            if fault:
+                label_style = "Fault.Panel.TLabel"
+            elif actual:
+                label_style = "Active.Panel.TLabel"
+            for label in self.channel_value_labels[index]:
+                label.configure(style=label_style)
 
         diagnostics = (
             f"Software identity : {snap.software_version}\n"

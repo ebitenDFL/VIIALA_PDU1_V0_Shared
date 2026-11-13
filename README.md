@@ -14,6 +14,9 @@ documentation, and signed A/B firmware-update images.
 - `docs/CANOPEN_DEVELOPER_GUIDE.md` — PDO/SDO integration reference.
 - `RELEASE_NOTES.md` — release status, hashes and known limitations.
 
+The current package uses Zephyr 4.5.0. The workbench automatically prepares
+`can0` when necessary and provides ON/OFF/Reset controls beside every output.
+
 ## Default connection
 
 | Setting | Default |

@@ -21,16 +21,16 @@ python3 -m venv .venv
 chmod +x run_gui.sh
 ```
 
-## Configure the CAN interface
+## CAN interface setup
 
-The PDU defaults to 500 kbit/s:
+The PDU defaults to 500 kbit/s. The launcher checks `can0` and leaves it alone
+when it is already active at the correct bitrate. Otherwise it configures and
+starts the interface with 100 ms automatic bus-off recovery. Linux may display
+one administrator-password prompt because CAN network configuration requires
+elevated permission.
 
-```bash
-sudo ip link set can0 down 2>/dev/null || true
-sudo ip link set can0 type can bitrate 500000 restart-ms 100
-sudo ip link set can0 up
-ip -details link show can0
-```
+Advanced users can override the defaults with `PDU_CAN_IFACE` and
+`PDU_CAN_BITRATE`.
 
 Optional traffic monitor:
 
@@ -64,8 +64,15 @@ Leaving Operational state clears all output requests.
 
 ## Fifteen Channels tab
 
-The table shows actual/requested state, current, raw ADC, peak current, trip
-count and fault state for every output.
+The table shows actual/commanded state, current, raw ADC, peak current, trip
+count and fault state for every output. Each row has dedicated **ON**, **OFF**
+and **Reset** buttons:
+
+- **ON** checks that the node is Operational and asks for confirmation before
+  writing the output request over SDO.
+- **OFF** immediately clears that output's request over SDO.
+- **Reset** first forces that output's request OFF, then pulses its latched-
+  fault clear object.
 
 To configure a channel:
 
@@ -85,8 +92,8 @@ Accepted firmware ranges:
 | Inrush allowance | 0–10000 ms | 500 ms |
 
 To operate an output, verify the load and limits, place the node Operational,
-select the channel and choose **Request ON/OFF**. Overcurrent faults latch the
-affected channel OFF. Turn its request OFF before using **Clear fault**.
+then use its row controls. The top **Request ON/OFF** and **Clear fault**
+controls remain available for the selected channel.
 
 ### Current display notes
 
@@ -139,8 +146,8 @@ ST-LINK recovery access available during development.
   only one application owns the same SDO channel.
 - **Object does not exist (`0x06020000`):** the PDU is running an older
   dictionary/firmware; update it before using the new control objects.
-- **Permission denied on `can0`:** bring the interface up with the commands
-  above and verify local networking permissions.
+- **Permission denied on `can0`:** accept the launcher's administrator prompt,
+  or configure the interface manually and verify local networking permissions.
 - **No GUI display from SSH:** run on the Linux desktop or use X forwarding.
 - **Raw value 4095 while OFF:** expected OFF-state diagnostic; use the current
   column and validity/state information.
