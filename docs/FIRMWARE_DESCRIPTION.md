@@ -20,8 +20,12 @@ Verified ADC connections:
 | NCV84045 current-sense enable | PB15, active high |
 
 The AD7490 uses SPI mode 0 at 1 MHz. Channels 0–14 correspond to outputs
-1–15. Channel 15 is the board voltage-divider input and is not currently
-published as a validated supply-voltage measurement.
+1–15. Channel 15 measures the PDU supply through the fitted 100 kohm / 22 kohm
+divider and is published every five seconds. With the 2.5 V ADC reference the
+present divider saturates at approximately 13.86 V.
+
+The STM32 factory calibration values are used for MCU die temperature and VDDA.
+Die temperature is junction temperature, not PCB or ambient temperature.
 
 ## Startup and fail-safe behavior
 
@@ -64,7 +68,8 @@ OFF-state diagnostic condition.
 ## CANopen services
 
 The firmware provides NMT slave behavior, heartbeat, SDO server access, four
-asynchronous TPDOs at 10 Hz, emergency/error objects and CiA 302-3-style
+asynchronous current/state TPDOs at 10 Hz, a five-second slow telemetry TPDO,
+emergency/error objects and CiA 302-3-style
 program download objects. See `CANOPEN_DEVELOPER_GUIDE.md` and the EDS files.
 
 ## Firmware identity

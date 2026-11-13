@@ -664,7 +664,10 @@ class PduGUI:
         self.voltage_text.set("—" if snap.supply_voltage_mv == 0xFFFF else f"{snap.supply_voltage_mv / 1000:.2f} V")
         board_temp = "—" if snap.board_temperature_dc == 0x7FFF else f"{snap.board_temperature_dc / 10:.1f} °C"
         mcu_temp = "—" if snap.mcu_temperature_dc == 0x7FFF else f"{snap.mcu_temperature_dc / 10:.1f} °C"
-        self.temperature_text.set(f"Board temperature {board_temp} · MCU temperature {mcu_temp}")
+        mcu_supply = "—" if snap.mcu_supply_voltage_mv == 0xFFFF else f"{snap.mcu_supply_voltage_mv / 1000:.3f} V"
+        self.temperature_text.set(
+            f"Board temperature {board_temp} · MCU die {mcu_temp} · MCU VDDA {mcu_supply}"
+        )
 
         issues = []
         if snap.error_register:

@@ -89,6 +89,7 @@ class PduSnapshot:
     supply_voltage_mv: int = 0xFFFF
     board_temperature_dc: int = 0x7FFF
     mcu_temperature_dc: int = 0x7FFF
+    mcu_supply_voltage_mv: int = 0xFFFF
     uptime_s: int = 0
     reset_reason: int = 0xFFFF
     brownout_count: int = 0
@@ -181,6 +182,7 @@ class PduCanClient:
             0x280 + self.node_id,
             0x380 + self.node_id,
             0x480 + self.node_id,
+            0x680 + self.node_id,
             0x580 + self.node_id,
             0x600 + self.node_id,
             0x700 + self.node_id,
@@ -240,6 +242,7 @@ class PduCanClient:
             ("supply_voltage_mv", 0x2007, 0, decode_u, 0xFFFF),
             ("board_temperature_dc", 0x2008, 0, decode_i, 0x7FFF),
             ("mcu_temperature_dc", 0x2009, 0, decode_i, 0x7FFF),
+            ("mcu_supply_voltage_mv", 0x2010, 0, decode_u, 0xFFFF),
             ("uptime_s", 0x200A, 0, decode_u, 0),
             ("reset_reason", 0x200B, 0, decode_u, 0xFFFF),
             ("brownout_count", 0x200C, 0, decode_u, 0),

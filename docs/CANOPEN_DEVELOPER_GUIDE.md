@@ -19,9 +19,10 @@ For node ID 10:
 | TPDO2 | `0x28A` | Currents 5–8, four `uint16` mA values |
 | TPDO3 | `0x38A` | Currents 9–12, four `uint16` mA values |
 | TPDO4 | `0x48A` | Currents 13–15, then active-output `uint16` bitmap |
+| TPDO5 | `0x68A` | Supply mV, MCU die temperature in 0.1 °C, MCU VDDA mV, warning flags; four 16-bit values |
 
-TPDO transmission type is 254 with a 100 ms event timer and 100 ms inhibit
-time. PDO transmission begins in Operational state.
+TPDO transmission type is 254. TPDO1–4 use a 100 ms event timer and 100 ms
+inhibit time; TPDO5 is sent every five seconds. PDO transmission begins in Operational state.
 
 ## Primary SDO objects
 
@@ -35,7 +36,10 @@ time. PDO transmission begins in Operational state.
 | `0x2002:00` | `uint16`, RO | Combined fault bitmap |
 | `0x2003:00` | `uint16`, RO | Overcurrent-fault bitmap |
 | `0x2006:00` | `uint32`, RO | Total current in mA |
+| `0x2007:00` | `uint16`, RO | PDU input voltage in mV |
+| `0x2009:00` | `int16`, RO | MCU die temperature in 0.1 °C |
 | `0x200F:00` | `uint32`, RO | Telemetry-validity bitmap |
+| `0x2010:00` | `uint16`, RO | MCU analog supply (VDDA) in mV |
 | `0x2103:00` | `uint16`, RW | Requested-output bitmap |
 | `0x2104:00` | `uint16`, RW | Fault-clear pulse bitmap |
 | `0x2105:00` | `uint8`, RW | Pending node ID |
@@ -57,7 +61,7 @@ in `object_dictionary/`.
 
 `0x200F` uses bit 0 for output-state validity, bits 1–15 for current channels,
 bit 16 for total current, bits 17–19 for voltage/temperatures, bit 20 for fault
-masks and bit 21 for diagnostic counters. Check validity before consuming a
+masks, bit 21 for diagnostic counters and bit 22 for MCU VDDA. Check validity before consuming a
 telemetry object.
 
 ## Python example

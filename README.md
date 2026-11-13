@@ -15,7 +15,8 @@ documentation, and signed A/B firmware-update images.
 - `RELEASE_NOTES.md` — release status, hashes and known limitations.
 
 The current package uses Zephyr 4.5.0. The workbench automatically prepares
-`can0` when necessary and provides ON/OFF/Reset controls beside every output.
+`can0` when necessary, provides ON/OFF/Reset controls beside every output, and
+shows five-second PDU input-voltage, MCU die-temperature and MCU-supply telemetry.
 
 ## Default connection
 
@@ -41,6 +42,8 @@ release.
   firmware variants but does not provide rollback or redundant active slots.
 - High-current calibration and protection timing still require validation with
   known fused loads.
+- The fitted 100 kohm / 22 kohm input divider saturates near 13.86 V with the
+  2.5 V ADC reference; change the divider before measuring a 14.4 V system.
 - These images are only for the verified VIIALA/SPEEDER PDU HW20 board.
 - Confirm every output is OFF before firmware transfer or bench wiring changes.
 

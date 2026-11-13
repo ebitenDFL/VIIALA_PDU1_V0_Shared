@@ -86,14 +86,14 @@ typedef timeOfDay_t TIME_DIFFERENCE;
   #define CO_NO_LSS_SERVER               0      /* LSS Slave */
   #define CO_NO_LSS_CLIENT               0      /* LSS Master */
   #define CO_NO_RPDO                     4      /* Associated objects: 14xx, 16xx */
-  #define CO_NO_TPDO                     4      /* Associated objects: 18xx, 1Axx */
+  #define CO_NO_TPDO                     5      /* Associated objects: 18xx, 1Axx */
   #define CO_NO_NMT_MASTER               0
 
 
 /*******************************************************************************
    OBJECT DICTIONARY
 *******************************************************************************/
-   #define CO_OD_NoOfElements             74
+   #define CO_OD_NoOfElements             77
 
 
 /*******************************************************************************
@@ -387,6 +387,17 @@ typedef timeOfDay_t TIME_DIFFERENCE;
 	#define OD_1803_5_TPDOCommunicationParameter_eventTimer     5
 	#define OD_1803_6_TPDOCommunicationParameter_SYNCStartValue 6
 
+/*1804 */
+	#define OD_1804_TPDOCommunicationParameter                  0x1804
+
+	#define OD_1804_0_TPDOCommunicationParameter_maxSubIndex    0
+	#define OD_1804_1_TPDOCommunicationParameter_COB_IDUsedByTPDO 1
+	#define OD_1804_2_TPDOCommunicationParameter_transmissionType 2
+	#define OD_1804_3_TPDOCommunicationParameter_inhibitTime    3
+	#define OD_1804_4_TPDOCommunicationParameter_compatibilityEntry 4
+	#define OD_1804_5_TPDOCommunicationParameter_eventTimer     5
+	#define OD_1804_6_TPDOCommunicationParameter_SYNCStartValue 6
+
 /*1a00 */
 	#define OD_1a00_TPDOMappingParameter                        0x1a00
 
@@ -438,6 +449,19 @@ typedef timeOfDay_t TIME_DIFFERENCE;
 	#define OD_1a03_6_TPDOMappingParameter_mappedObject6        6
 	#define OD_1a03_7_TPDOMappingParameter_mappedObject7        7
 	#define OD_1a03_8_TPDOMappingParameter_mappedObject8        8
+
+/*1a04 */
+	#define OD_1a04_TPDOMappingParameter                        0x1a04
+
+	#define OD_1a04_0_TPDOMappingParameter_maxSubIndex          0
+	#define OD_1a04_1_TPDOMappingParameter_mappedObject1        1
+	#define OD_1a04_2_TPDOMappingParameter_mappedObject2        2
+	#define OD_1a04_3_TPDOMappingParameter_mappedObject3        3
+	#define OD_1a04_4_TPDOMappingParameter_mappedObject4        4
+	#define OD_1a04_5_TPDOMappingParameter_mappedObject5        5
+	#define OD_1a04_6_TPDOMappingParameter_mappedObject6        6
+	#define OD_1a04_7_TPDOMappingParameter_mappedObject7        7
+	#define OD_1a04_8_TPDOMappingParameter_mappedObject8        8
 
 /*1f50 */
 	#define OD_1f50_programData                                 0x1f50
@@ -514,6 +538,9 @@ typedef timeOfDay_t TIME_DIFFERENCE;
 /*200f */
 	#define OD_200f_telemetryValidity                           0x200f
 
+/*2010 */
+	#define OD_2010_mcuSupplyVoltage_mV                         0x2010
+
 /*2100 */
 	#define OD_2100_errorStatusBits                             0x2100
 
@@ -589,8 +616,8 @@ struct sCO_OD_ROM {
 /*1200      */ OD_SDOServerParameter_t SDOServerParameter[1];
 /*1400      */ OD_RPDOCommunicationParameter_t RPDOCommunicationParameter[4];
 /*1600      */ OD_RPDOMappingParameter_t RPDOMappingParameter[4];
-/*1800      */ OD_TPDOCommunicationParameter_t TPDOCommunicationParameter[4];
-/*1a00      */ OD_TPDOMappingParameter_t TPDOMappingParameter[4];
+/*1800      */ OD_TPDOCommunicationParameter_t TPDOCommunicationParameter[5];
+/*1a00      */ OD_TPDOMappingParameter_t TPDOMappingParameter[5];
 /*1f80      */ UNSIGNED32 NMTStartup;
 
 	UNSIGNED32 LastWord;
@@ -625,6 +652,7 @@ struct sCO_OD_RAM {
 /*200d      */ UNSIGNED16 canBusOffCount;
 /*200e      */ UNSIGNED16 warningFlags;
 /*200f      */ UNSIGNED32 telemetryValidity;
+/*2010      */ UNSIGNED16 mcuSupplyVoltage_mV;
 /*2100      */ OCTET_STRING errorStatusBits[10];
 /*2102      */ UNSIGNED32 buttonPressCounter;
 /*2103      */ UNSIGNED16 outputRequest;
@@ -826,6 +854,9 @@ extern struct sCO_OD_EEPROM CO_OD_EEPROM;
 
 /*200f, Data Type: UNSIGNED32 */
 	#define OD_telemetryValidity                                CO_OD_RAM.telemetryValidity
+
+/*2010, Data Type: UNSIGNED16 */
+	#define OD_mcuSupplyVoltage_mV                              CO_OD_RAM.mcuSupplyVoltage_mV
 
 /*2100, Data Type: OCTET_STRING */
 	#define OD_errorStatusBits                                  CO_OD_RAM.errorStatusBits

@@ -125,7 +125,7 @@ DefaultValue=0x00000000
 PDOMapping=0
 
 [OptionalObjects]
-SupportedObjects=39
+SupportedObjects=41
 1=0x1002
 2=0x1003
 3=0x1005
@@ -165,6 +165,8 @@ SupportedObjects=39
 37=0x1F56
 38=0x1F57
 39=0x1F80
+40=0x1804
+41=0x1A04
 
 [1002]
 ParameterName=Manufacturer status register
@@ -1318,6 +1320,68 @@ AccessType=rw
 DefaultValue=0
 PDOMapping=0
 
+[1804]
+ParameterName=Slow telemetry TPDO communication parameter
+ObjectType=0x9
+;StorageLocation=ROM
+SubNumber=0x7
+
+[1804sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+DataType=0x0005
+AccessType=ro
+DefaultValue=6
+PDOMapping=0
+
+[1804sub1]
+ParameterName=COB-ID used by TPDO
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=$NODEID+0x680
+PDOMapping=0
+
+[1804sub2]
+ParameterName=transmission type
+ObjectType=0x7
+DataType=0x0005
+AccessType=rw
+DefaultValue=254
+PDOMapping=0
+
+[1804sub3]
+ParameterName=inhibit time
+ObjectType=0x7
+DataType=0x0006
+AccessType=rw
+DefaultValue=1000
+PDOMapping=0
+
+[1804sub4]
+ParameterName=compatibility entry
+ObjectType=0x7
+DataType=0x0005
+AccessType=ro
+DefaultValue=0
+PDOMapping=0
+
+[1804sub5]
+ParameterName=event timer
+ObjectType=0x7
+DataType=0x0006
+AccessType=rw
+DefaultValue=5000
+PDOMapping=0
+
+[1804sub6]
+ParameterName=SYNC start value
+ObjectType=0x7
+DataType=0x0005
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
 [1A00]
 ParameterName=TPDO mapping parameter
 ObjectType=0x9
@@ -1666,6 +1730,84 @@ AccessType=rw
 DefaultValue=0x00000000
 PDOMapping=0
 
+[1A04]
+ParameterName=Slow telemetry TPDO mapping parameter
+ObjectType=0x9
+;StorageLocation=ROM
+SubNumber=0x9
+
+[1A04sub0]
+ParameterName=Number of mapped objects
+ObjectType=0x7
+DataType=0x0005
+AccessType=rw
+DefaultValue=4
+PDOMapping=0
+
+[1A04sub1]
+ParameterName=PDU supply voltage
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0x20070010
+PDOMapping=0
+
+[1A04sub2]
+ParameterName=MCU die temperature
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0x20090010
+PDOMapping=0
+
+[1A04sub3]
+ParameterName=MCU analog supply
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0x20100010
+PDOMapping=0
+
+[1A04sub4]
+ParameterName=Warning flags
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0x200E0010
+PDOMapping=0
+
+[1A04sub5]
+ParameterName=mapped object 5
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[1A04sub6]
+ParameterName=mapped object 6
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[1A04sub7]
+ParameterName=mapped object 7
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[1A04sub8]
+ParameterName=mapped object 8
+ObjectType=0x7
+DataType=0x0007
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
 [1F50]
 ParameterName=Program data
 ObjectType=0x8
@@ -1772,7 +1914,7 @@ DefaultValue=0x00000000
 PDOMapping=0
 
 [ManufacturerObjects]
-SupportedObjects=32
+SupportedObjects=33
 1=0x2000
 2=0x2001
 3=0x2002
@@ -1805,6 +1947,7 @@ SupportedObjects=32
 30=0x3101
 31=0x3102
 32=0x3103
+33=0x2010
 
 [2000]
 ParameterName=Active output state bitmap
@@ -1948,6 +2091,15 @@ ObjectType=0x7
 DataType=0x0007
 AccessType=ro
 DefaultValue=1
+PDOMapping=1
+
+[2010]
+ParameterName=MCU analog supply voltage
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0006
+AccessType=ro
+DefaultValue=65535
 PDOMapping=1
 
 [2100]

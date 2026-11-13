@@ -56,7 +56,11 @@ The Overview tab displays:
 - CANopen NMT state and heartbeat age;
 - uptime and active-output count;
 - total measured output current;
-- available supply/temperature telemetry and health flags.
+- PDU input voltage, MCU die temperature, MCU VDDA and health flags.
+
+These slow channels update every five seconds. The displayed MCU temperature is
+the silicon junction temperature. The present input divider saturates near
+13.86 V, so readings cannot represent a normal 14.4 V charging maximum.
 
 Use **Pre-op**, **Start**, and **Stop** for NMT state changes. Output requests
 only actuate while the node is Operational and current acquisition is valid.
